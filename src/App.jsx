@@ -16,7 +16,9 @@ const TABS = [
 export default function App() {
   const [tab, setTab] = useState('timer')
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('theme') || 'system'
+    const saved = localStorage.getItem('theme') || 'system'
+    document.documentElement.setAttribute('data-theme', saved)
+    return saved
   })
   const { entries, addEntry, deleteEntry, exportData, importData } = useJournal()
 
@@ -25,8 +27,15 @@ export default function App() {
     setTab('journal')
   }
 
+  const cycleTheme = () => {
+    const next = theme === 'system' ? 'light' : theme === 'light' ? 'dark' : 'system'
+    setTheme(next)
+    localStorage.setItem('theme', next)
+    document.documentElement.setAttribute('data-theme', next)
+  }
+
   return (
-    <div className={styles.app} data-theme={theme}>
+    <div className={styles.app}>
       <main className={styles.main}>
         <div className={styles.page}>
           {tab === 'timer'   && <BrewTimer />}
@@ -65,14 +74,7 @@ export default function App() {
           </button>
         ))}
 
-        <button
-          className={styles.themeBtn}
-          onClick={() => {
-            const next = theme === 'system' ? 'light' : theme === 'light' ? 'dark' : 'system'
-            setTheme(next)
-            localStorage.setItem('theme', next)
-          }}
-        >
+        <button className={styles.themeBtn} onClick={cycleTheme}>
           <span>{theme === 'dark' ? '☀️' : theme === 'light' ? '⚙️' : '🌙'}</span>
           <span>{theme === 'dark' ? 'Light mode' : theme === 'light' ? 'System' : 'Dark mode'}</span>
         </button>
