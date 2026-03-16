@@ -67,6 +67,7 @@ npm run build
 
 5. Done. The included workflow (`.github/workflows/deploy.yml`) builds and deploys on every push to `main`.
 
+
 **Live URL:**
 ```
 https://YOUR_USERNAME.github.io/v60-coffee-journal/
