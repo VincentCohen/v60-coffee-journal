@@ -11,13 +11,6 @@
   display: none;
 }
 
-/* .header {
-  flex-shrink: 0;
-  padding: 1.25rem 1.25rem .75rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
-} */
-
 .title {
   font-family: var(--font-serif);
   font-size: 26px;
@@ -92,9 +85,9 @@
   text-align: center;
 }
 
-.themeBtn {
-  display: none;
-}
+.themeBtn { display: none; }
+.signOutBtn { display: none; }
+.signInBtn { display: none; }
 
 @media (min-width: 768px) {
   .app {
@@ -110,15 +103,16 @@
     background: none;
     padding: 1.25rem 1.25rem 1rem;
     margin-bottom: 0.25rem;
+    flex-shrink: 0;
   }
 
   .title {
-    font-size: 24px;
+    font-size: 17px;
     font-weight: 600;
   }
 
   .sub {
-    font-size: 16px;
+    font-size: 11px;
     margin-top: 2px;
   }
 
@@ -130,7 +124,7 @@
     flex-shrink: 0;
     border-top: none;
     border-right: 1px solid var(--border);
-    padding: 2rem 0;
+    padding: 0 0 1rem;
     justify-content: flex-start;
     gap: 4px;
     order: -1;
@@ -139,14 +133,14 @@
   .navBtn {
     flex-direction: row;
     justify-content: flex-start;
-    padding: 12px 20px;
-    gap: 12px;
+    padding: 9px 16px;
+    gap: 10px;
     border-radius: var(--r-md);
     margin: 0 10px;
     width: calc(100% - 20px);
   }
 
-  .navIcon { font-size: 18px; }
+  .navIcon { font-size: 16px; }
 
   .navLabel {
     font-size: 14px;
@@ -162,21 +156,26 @@
   .main {
     flex: 1;
     overflow-y: auto;
-    display: flex;           
+    display: flex;
     justify-content: center;
   }
 
   .page {
-    max-width: 780px;   /* was 640px */
-    padding: 2.5rem 3rem; /* was 2rem 2.5rem */
-    width: 100%;          /* ← add this */
+    max-width: 780px;
+    padding: 2.5rem 3rem;
+    width: 100%;
+  }
+
+  /* spacer pushes theme + signin to the bottom */
+  .navSpacer {
+    flex: 1;
   }
 
   .themeBtn {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: auto 10px 0;
+    margin: 0 10px;
     padding: 9px 16px;
     border-radius: var(--r-md);
     border: none;
@@ -193,5 +192,49 @@
     background: var(--bg-muted);
     color: var(--text);
   }
-}
 
+  .signOutBtn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 10px;
+    padding: 9px 16px;
+    border-radius: var(--r-md);
+    border: none;
+    background: none;
+    color: var(--text-3);
+    font-size: 13px;
+    font-family: var(--font-sans);
+    width: calc(100% - 20px);
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    text-align: left;
+  }
+
+  .signOutBtn:hover {
+    background: var(--bg-muted);
+    color: var(--text);
+  }
+
+  .signInBtn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 10px;
+    padding: 9px 16px;
+    border-radius: var(--r-md);
+    border: none;
+    background: none;
+    color: var(--text-3);
+    font-size: 13px;
+    font-family: var(--font-sans);
+    width: calc(100% - 20px);
+    cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+
+  .signInBtn:hover {
+    background: var(--bg-muted);
+    color: var(--text);
+  }
+}
