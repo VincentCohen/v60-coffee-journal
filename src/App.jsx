@@ -13,17 +13,15 @@ const TABS = [
   { id: 'journal', icon: '📖', label: 'Journal' },
 ]
 
-const [theme, setTheme] = useState(() => {
-  return localStorage.getItem('theme') || 'system'
-})
-
 export default function App() {
   const [tab, setTab] = useState('timer')
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('theme') || 'system'
+  })
   const { entries, addEntry, deleteEntry, exportData, importData } = useJournal()
 
   const handleSave = (entry) => {
     addEntry(entry)
-
     setTab('journal')
   }
 
@@ -50,7 +48,7 @@ export default function App() {
           <h1 className={styles.title}>V60 Journal</h1>
           <p className={styles.sub}>James Hoffman's recipe</p>
         </header>
-        
+
         {TABS.map(t => (
           <button
             key={t.id}
@@ -67,15 +65,18 @@ export default function App() {
           </button>
         ))}
 
-        <button className={styles.themeBtn}
+        <button
+          className={styles.themeBtn}
           onClick={() => {
             const next = theme === 'system' ? 'light' : theme === 'light' ? 'dark' : 'system'
             setTheme(next)
             localStorage.setItem('theme', next)
-          }} >
-        {theme === 'dark' ? '☀️' : theme === 'light' ? '⚙️' : '🌙'}
-        <span>{theme === 'dark' ? 'Light mode' : theme === 'light' ? 'System' : 'Dark mode'}</span>
-      </button>
+          }}
+        >
+          <span>{theme === 'dark' ? '☀️' : theme === 'light' ? '⚙️' : '🌙'}</span>
+          <span>{theme === 'dark' ? 'Light mode' : theme === 'light' ? 'System' : 'Dark mode'}</span>
+        </button>
+
       </nav>
     </div>
   )
