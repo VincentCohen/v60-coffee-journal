@@ -1,0 +1,75 @@
+.journal { display: flex; flex-direction: column; gap: 1rem; }
+
+.stats {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+}
+
+.stat {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: .875rem 1rem;
+  text-align: center;
+}
+
+.statVal { display: block; font-family: var(--font-serif); font-size: 28px; line-height: 1; margin-bottom: 3px; }
+
+.statLbl { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-3); font-weight: 500; }
+
+.dataBar {
+  display: flex; gap: 8px;
+}
+
+.dataBtn {
+  flex: 1; padding: 11px; border-radius: var(--r-md);
+  border: 1px solid var(--border-md); background: var(--bg-card);
+  color: var(--text); font-size: 14px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background .15s;
+  font-family: var(--font-sans);
+}
+
+.dataBtn:hover { background: var(--bg-muted); }
+.dataBtn:active { transform: scale(.98); }
+
+.dataBtn span { font-size: 16px; color: var(--c500); }
+
+.importMsg {
+  background: var(--c100); color: var(--c700);
+  padding: 10px 14px; border-radius: var(--r-md);
+  font-size: 14px; font-weight: 500;
+  animation: fadein .2s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  .importMsg { background: var(--c800); color: var(--c200); }
+}
+
+@keyframes fadein { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:none} }
+
+.entries { display: flex; flex-direction: column; gap: .75rem; }
+
+.empty {
+  text-align: center;
+  padding: 3.5rem 1rem;
+  color: var(--text-2);
+  display: flex; flex-direction: column; align-items: center; gap: .75rem;
+}
+
+.emptyIcon { font-size: 40px; opacity: .3; display: block; }
+
+.empty h3 { font-family: var(--font-serif); font-size: 20px; font-style: italic; }
+
+.empty p { font-size: 14px; color: var(--text-3); }
+
+.empty em { font-style: normal; font-weight: 500; }
+
+.importCta {
+  margin-top: .5rem;
+  background: none; border: 1px solid var(--border-md);
+  color: var(--text-2); padding: 10px 18px; border-radius: var(--r-md);
+  font-size: 14px; font-family: var(--font-sans);
+  transition: background .15s;
+}
+
+.importCta:hover { background: var(--bg-muted); }
