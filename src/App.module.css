@@ -8,11 +8,15 @@
 }
 
 .header {
+  display: none;
+}
+
+/* .header {
   flex-shrink: 0;
   padding: 1.25rem 1.25rem .75rem;
   border-bottom: 1px solid var(--border);
   background: var(--bg);
-}
+} */
 
 .title {
   font-family: var(--font-serif);
