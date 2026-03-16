@@ -92,6 +92,10 @@
   text-align: center;
 }
 
+.themeBtn {
+  display: none;
+}
+
 @media (min-width: 768px) {
   .app {
     flex-direction: row;
@@ -166,6 +170,28 @@
     max-width: 780px;   /* was 640px */
     padding: 2.5rem 3rem; /* was 2rem 2.5rem */
     width: 100%;          /* ← add this */
+  }
+
+  .themeBtn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: auto 10px 0;
+    padding: 9px 16px;
+    border-radius: var(--r-md);
+    border: none;
+    background: none;
+    color: var(--text-3);
+    font-size: 13px;
+    font-family: var(--font-sans);
+    width: calc(100% - 20px);
+    cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+
+  .themeBtn:hover {
+    background: var(--bg-muted);
+    color: var(--text);
   }
 }
 

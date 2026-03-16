@@ -38,8 +38,9 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg:       #1a1208;
     --bg-card:  #231910;
     --bg-muted: #2c2010;
@@ -49,6 +50,17 @@
     --text-2:   #c4a07a;
     --text-3:   #8a7060;
   }
+}
+
+[data-theme='dark'] {
+  --bg:       #1a1208;
+  --bg-card:  #231910;
+  --bg-muted: #2c2010;
+  --border:   rgba(200,160,100,0.1);
+  --border-md:rgba(200,160,100,0.2);
+  --text:     #f5ede0;
+  --text-2:   #c4a07a;
+  --text-3:   #8a7060;
 }
 
 html { font-size: 16px; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
