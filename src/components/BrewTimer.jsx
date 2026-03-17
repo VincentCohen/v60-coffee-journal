@@ -16,7 +16,7 @@ function fmt(s) {
   return `${m}:${String(sec).padStart(2, '0')}`
 }
 
-export default function BrewTimer() {
+export default function BrewTimer({ onDone } = {}) {
   const [state, setState]   = useState('idle')   // idle | running | paused | done
   const [elapsed, setElapsed] = useState(0)
   const [stepIdx, setStepIdx] = useState(0)
@@ -50,8 +50,10 @@ export default function BrewTimer() {
     if (clamped >= TOTAL)
     {
       clearInterval(intervalRef.current)
-
+     
       setState('done')
+     
+      onDone?.()
     }
   }, [])
 

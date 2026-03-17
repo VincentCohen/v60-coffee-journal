@@ -5,10 +5,12 @@ import BrewTimer from './components/BrewTimer.jsx'
 import LogForm   from './components/LogForm.jsx'
 import Journal   from './components/Journal.jsx'
 import Login     from './components/Login.jsx'
+import BrewSession from './components/BrewSession.jsx'
 import { useJournal } from './hooks/useJournal.js'
 import styles from './App.module.css'
 
 const TABS = [
+  { id: 'brew',    icon: '☕', label: 'Brew'    },
   { id: 'timer',   icon: '⏱', label: 'Timer'   },
   { id: 'guide',   icon: '☕', label: 'Recipe'  },
   { id: 'log',     icon: '✏️', label: 'Log'     },
@@ -74,9 +76,10 @@ export default function App() {
     <div className={styles.app}>
       <main className={styles.main}>
         <div className={styles.page}>
+          {tab === 'brew'    && <BrewSession onSave={handleSave} getBeanMemory={getBeanMemory} />}
           {tab === 'timer'   && <BrewTimer />}
-          {tab === 'guide'   && <BrewGuide />}
           {tab === 'log'     && <LogForm onSave={addEntry} getBeanMemory={getBeanMemory} />}
+          {tab === 'guide'   && <BrewGuide />}
           {tab === 'journal' && (
             <Journal
               entries={entries}
