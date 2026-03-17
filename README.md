@@ -84,13 +84,6 @@ git push
 GitHub Actions handles the rest automatically.
 
 ---
-
-## Add a Buy Me a Coffee button
-
-1. Create a free account at [buymeacoffee.com](https://www.buymeacoffee.com)
-2. Copy your profile URL (e.g. `https://www.buymeacoffee.com/yourname`)
-3. Open `src/App.jsx` and add this link to the `<header>`:
-
 ```jsx
 <a
   href="https://www.buymeacoffee.com/yourname"
