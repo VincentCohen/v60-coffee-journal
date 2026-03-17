@@ -27,7 +27,6 @@
   margin: 0;
 }
 
-/* Reuse LogForm field styles exactly */
 .group {
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -92,7 +91,6 @@
   line-height: 1.5;
 }
 
-/* Bean hint */
 .beanHint {
   background: var(--c100);
   border: 1px solid var(--c300);
@@ -127,7 +125,6 @@
   padding: 5px 6px;
 }
 
-/* Sliders */
 .sliders { display: flex; flex-direction: column; gap: 10px; }
 
 .sliderRow {
@@ -150,7 +147,6 @@ input[type="range"] {
   accent-color: var(--c500);
 }
 
-/* Chips */
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .chip {
@@ -171,7 +167,6 @@ input[type="range"] {
   color: #fff;
 }
 
-/* Stars */
 .stars { display: flex; gap: 6px; }
 
 .star {
@@ -187,7 +182,6 @@ input[type="range"] {
 
 .starOn { color: var(--c500); }
 
-/* Buttons */
 .startBtn {
   width: 100%;
   padding: 15px;

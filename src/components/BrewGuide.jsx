@@ -1,57 +1,54 @@
 import styles from './BrewGuide.module.css'
 
 const STEPS = [
-  { title: 'Rinse filter', detail: 'Rinse the paper filter with hot water and discard. Preheats the dripper and removes papery taste.' },
-  { title: 'Add coffee & create a well', detail: 'Add 15 g of medium-fine ground coffee. Shake to level, then press a small well in the centre.' },
-  { title: 'Bloom — 0:00 to 0:45', detail: 'Pour 50 g in a slow spiral, saturating all grounds. Wait until 0:45.' },
-  { title: 'First pour — 0:45 to 1:30', detail: 'Pour steadily up to 150 g total. Gentle continuous spiral, keep the level consistent.' },
-  { title: 'Second pour — 1:30 to 2:30', detail: 'Pour to 250 g total. Aim to finish by 2:00. Slow and steady.' },
-  { title: 'Swirl & drawdown', detail: 'Gentle swirl to flatten the bed. Drawdown should finish 3:30–4:00. Faster → finer grind. Slower → coarser.' },
+  { time: '0:00', duration: '45s', label: 'Bloom', detail: 'Pour 50 g — slow spiral from centre, saturate all grounds. Wait for bloom to subside.' },
+  { time: '0:45', duration: '45s', label: 'First pour', detail: 'Pour steadily to 150 g — gentle continuous spiral, working outward.' },
+  { time: '1:30', duration: '60s', label: 'Second pour', detail: 'Pour to 250 g — slow and steady to finish. Don\'t agitate the bed.' },
+  { time: '2:30', duration: '~90s', label: 'Drawdown', detail: 'Swirl the dripper gently to level the bed, then wait for full drawdown.' },
+  { time: '4:00', duration: '', label: 'Done', detail: 'Total brew time ~4 minutes. Remove dripper and enjoy.' },
 ]
 
 export default function BrewGuide() {
   return (
     <div className={styles.guide}>
-      <div className={styles.hero}>
-        <div className={styles.heroGrid}>
-          {[['Coffee','15 g'],['Water','250 g'],['Ratio','1:16.7'],['Temp','92–96 °C']].map(([l,v]) => (
-            <div key={l} className={styles.heroItem}>
-              <span className={styles.heroLabel}>{l}</span>
-              <span className={styles.heroVal}>{v}</span>
-            </div>
-          ))}
+      <div className={styles.ratioCard}>
+        <div className={styles.ratioItem}>
+          <span className={styles.ratioVal}>15 g</span>
+          <span className={styles.ratioLbl}>Coffee</span>
+        </div>
+        <div className={styles.ratioDivider}>:</div>
+        <div className={styles.ratioItem}>
+          <span className={styles.ratioVal}>250 g</span>
+          <span className={styles.ratioLbl}>Water</span>
+        </div>
+        <div className={styles.ratioDivider}>@</div>
+        <div className={styles.ratioItem}>
+          <span className={styles.ratioVal}>92–96°C</span>
+          <span className={styles.ratioLbl}>Temp</span>
         </div>
       </div>
 
-      <div className={styles.card}>
-        <p className={styles.cardLabel}>Method</p>
-        <ol className={styles.steps}>
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>Steps</h2>
+        <div className={styles.steps}>
           {STEPS.map((s, i) => (
-            <li key={i} className={styles.step}>
-              <span className={styles.num}>{i + 1}</span>
-              <div>
-                <strong className={styles.stepTitle}>{s.title}</strong>
+            <div key={i} className={styles.step}>
+              <div className={styles.stepTime}>
+                <span className={styles.stepAt}>{s.time}</span>
+                {s.duration && <span className={styles.stepDur}>{s.duration}</span>}
+              </div>
+              <div className={styles.stepBody}>
+                <span className={styles.stepLabel}>{s.label}</span>
                 <p className={styles.stepDetail}>{s.detail}</p>
               </div>
-            </li>
-          ))}
-        </ol>
-      </div>
-
-      <div className={styles.card}>
-        <p className={styles.cardLabel}>Grind guide</p>
-        <div className={styles.grindScale}>
-          {['Espresso','V60','Chemex','French press'].map(l => (
-            <div key={l} className={`${styles.grindItem} ${l === 'V60' ? styles.grindActive : ''}`}>
-              <div className={styles.grindDot} />
-              <span>{l}</span>
             </div>
           ))}
-          <div className={styles.grindLine} />
         </div>
-        <p className={styles.grindNote}>
-          Medium-fine — a little coarser than espresso. Adjust by drawdown time.
-        </p>
+      </div>
+
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>Grind guide</h2>
+        <p className={styles.grindNote}>Medium-fine. On a Comandante C40, start around 24–26 clicks. Adjust: if drawdown is under 3:30, go coarser. If over 4:30, go finer.</p>
       </div>
     </div>
   )

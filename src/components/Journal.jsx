@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import EntryCard from './EntryCard.jsx'
 import styles from './Journal.module.css'
+import BrewStreaks from './BrewStreaks.jsx'
 
 export default function Journal({ entries, onDelete, onExport, onImport }) {
   const fileRef = useRef(null)
@@ -47,6 +48,8 @@ export default function Journal({ entries, onDelete, onExport, onImport }) {
             </button>
             <input ref={fileRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleFile} />
           </div>
+
+          <BrewStreaks entries={entries} />
         </>
       )}
 
