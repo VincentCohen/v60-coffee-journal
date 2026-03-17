@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import styles from './LogForm.module.css'
 
 const FLAVORS = ['Chocolate','Caramel','Citrus','Berry','Stone fruit','Floral','Nutty','Honey','Vanilla','Earthy','Tobacco','Winey']
@@ -11,7 +11,7 @@ const EMPTY = {
   flavors:[], rating:0, notes:'',
 }
 
-export default function LogForm({ onSave }) {
+export default function LogForm({ onSave, getBeanMemory }) {
   const [f, setF] = useState(EMPTY)
   const [flash, setFlash] = useState(false)
 
@@ -26,9 +26,54 @@ export default function LogForm({ onSave }) {
     setTimeout(() => setFlash(false), 2200)
   }
 
+  const [beanHint, setBeanHint] = useState(null)   // { bean, grinder, grindSetting }
+  const [hintDismissed, setHintDismissed] = useState(false)
+
+  useEffect(() => {
+    if (hintDismissed) return
+    const memory = getBeanMemory?.(f.bean)
+    setBeanHint(memory || null)
+  }, [f.bean, hintDismissed])
+
+  const applyHint = () => {
+    set('bean', beanHint.bean)
+    set('roaster', beanHint.roaster)
+    set('roast', beanHint.roast)
+    set('grinder', beanHint.grinder)
+    set('grindSetting', beanHint.grindSetting)
+
+    setBeanHint(null)
+    setHintDismissed(true)
+  }
+
+  const dismissHint = () => {
+    setBeanHint(null)
+    setHintDismissed(true)
+  }
+
+  // Reset dismissed state when bean field is cleared
+  useEffect(() => {
+    if (hintDismissed) { 
+      return
+    }
+
+    const memory = getBeanMemory?.(f.bean, f.roaster)
+    
+    setBeanHint(memory || null)
+  }, [f.bean, f.roaster, hintDismissed])
+
   return (
     <div className={styles.form}>
       {flash && <div className={styles.flash}>Brew saved — nice one! ✓</div>}
+      {beanHint && (
+        <div className={styles.beanHint}>
+          <span>Last time with <strong>{[beanHint.roaster, beanHint.bean].filter(Boolean).join(' · ')}</strong>: {beanHint.grinder}{beanHint.grindSetting ? `, setting ${beanHint.grindSetting}` : ''} — use these?</span>
+          <div className={styles.hintActions}>
+            <button type="button" onClick={applyHint}>Use these</button>
+            <button type="button" onClick={dismissHint}>✕</button>
+          </div>
+        </div>
+      )}
 
       <fieldset className={styles.group}>
         <legend className={styles.legend}>Bean</legend>

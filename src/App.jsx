@@ -26,7 +26,7 @@ export default function App() {
     return saved
   })
 
-  const { entries, addEntry, deleteEntry, exportData, importData } = useJournal(user)
+  const { entries, addEntry, deleteEntry, exportData, importData, getBeanMemory } = useJournal(user)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -76,7 +76,7 @@ export default function App() {
         <div className={styles.page}>
           {tab === 'timer'   && <BrewTimer />}
           {tab === 'guide'   && <BrewGuide />}
-          {tab === 'log'     && <LogForm onSave={handleSave} />}
+          {tab === 'log'     && <LogForm onSave={addEntry} getBeanMemory={getBeanMemory} />}
           {tab === 'journal' && (
             <Journal
               entries={entries}

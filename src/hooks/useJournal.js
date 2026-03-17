@@ -5,8 +5,8 @@ const LOCAL_KEY = 'v60-journal-v2'
 
 export function useJournal(user) {
   const [entries, setEntries] = useState([])
+  const [loaded, setLoaded] = useState(false)
 
-  // Load entries — from Supabase if logged in, localStorage if not
   useEffect(() => {
     if (user) {
       supabase
@@ -15,20 +15,21 @@ export function useJournal(user) {
         .order('created_at', { ascending: false })
         .then(({ data, error }) => {
           if (!error && data) setEntries(data.map(fromSupabase))
+          setLoaded(true)
         })
     } else {
       try {
         setEntries(JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'))
       } catch { setEntries([]) }
+      setLoaded(true)
     }
   }, [user])
 
-  // Save to localStorage whenever entries change (non-logged-in users)
   useEffect(() => {
-    if (!user) {
+    if (!user && loaded) {
       try { localStorage.setItem(LOCAL_KEY, JSON.stringify(entries)) } catch {}
     }
-  }, [entries, user])
+  }, [entries, user, loaded])
 
   const addEntry = async (entry) => {
     if (user) {
@@ -94,10 +95,23 @@ export function useJournal(user) {
     reader.readAsText(file)
   })
 
-  return { entries, addEntry, deleteEntry, exportData, importData }
+  const getBeanMemory = (beanName, roaster = '') => {
+    if (!beanName.trim()) return null
+    const lowerBean = beanName.toLowerCase()
+    const lowerRoaster = roaster.toLowerCase()
+    const match = entries.find(e => {
+      const beanMatch = e.bean.toLowerCase().includes(lowerBean) || lowerBean.includes(e.bean.toLowerCase())
+      const roasterMatch = !lowerRoaster || !e.roaster || e.roaster.toLowerCase().includes(lowerRoaster) || lowerRoaster.includes(e.roaster.toLowerCase())
+      return beanMatch && roasterMatch
+    })
+    if (!match || (!match.grinder && !match.grindSetting)) return null
+  
+    return { bean: match.bean, roaster: match.roaster, roast: match.roast, grinder: match.grinder, grindSetting: match.grindSetting }
+  }
+
+  return { entries, addEntry, deleteEntry, exportData, importData, getBeanMemory }
 }
 
-// Convert Supabase row → app entry
 function fromSupabase(row) {
   return {
     id:           row.id,
@@ -123,7 +137,6 @@ function fromSupabase(row) {
   }
 }
 
-// Convert app entry → Supabase row
 function toSupabase(entry, userId) {
   return {
     user_id:       userId,

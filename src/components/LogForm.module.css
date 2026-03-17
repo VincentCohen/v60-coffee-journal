@@ -87,3 +87,59 @@
 
 .saveBtn:hover { background: var(--c700); }
 .saveBtn:active { transform: scale(.99); }
+
+.beanHint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+  background: var(--accent-subtle, #f5ede4);
+  border: 1px solid var(--accent, #b07d5a);
+  font-size: 0.85rem;
+  color: var(--text);
+  flex-wrap: wrap;
+}
+
+.beanHint span {
+  color: #3b2a1a;
+  flex: 1;
+}
+
+
+.hintActions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.hintActions button {
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid var(--accent, #b07d5a);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.hintActions button:first-child {
+  background: var(--accent, #b07d5a);
+  color: #fff;
+  border-color: transparent;
+}
+
+.hintActions button:last-child {
+  background: transparent;
+  border: 1px solid #b07d5a;
+  color: #3b2a1a;
+  font-size: 0.75rem;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
