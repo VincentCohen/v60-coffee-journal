@@ -5,10 +5,10 @@ const STEPS = [
   { label: 'Bloom',        cue: 'Pour 50 g — slow spiral, saturate all grounds', target: 45,  pour: '→ 50 g',  colour: '#a07850' },
   { label: 'First pour',   cue: 'Pour steadily to 150 g — gentle continuous spiral', target: 45, pour: '→ 150 g', colour: '#8a6240' },
   { label: 'Second pour',  cue: 'Pour to 250 g — slow and steady to finish', target: 60, pour: '→ 250 g', colour: '#6b4e2e' },
-  { label: 'Drawdown',     cue: 'Swirl the dripper gently, then wait for full drawdown', target: 90, pour: null,    colour: '#3d2a14' },
+  { label: 'Drawdown',     cue: 'Swirl the dripper gently, then wait for full drawdown', target: 90, pour: null, colour: '#3d2a14' },
 ]
 
-const TOTAL = STEPS.reduce((s, x) => s + x.target, 0) // 240s = 4:00
+const TOTAL = STEPS.reduce((s, x) => s + x.target, 0)
 
 function fmt(s) {
   const m = Math.floor(s / 60)
@@ -16,111 +16,130 @@ function fmt(s) {
   return `${m}:${String(sec).padStart(2, '0')}`
 }
 
-export default function BrewTimer({ onDone } = {}) {
-  const [state, setState]   = useState('idle')   // idle | running | paused | done
-  const [elapsed, setElapsed] = useState(0)
-  const [stepIdx, setStepIdx] = useState(0)
+export default function BrewTimer({ onDone, onStepChange, onStart, onPause, onResume } = {}) {
+  const [state, setState]             = useState('idle')
+  const [realElapsed, setRealElapsed] = useState(0)
+  const [stepIdx, setStepIdx]         = useState(0)
   const [stepElapsed, setStepElapsed] = useState(0)
-  const intervalRef = useRef(null)
-  const startRef    = useRef(null)
-  const baseRef     = useRef(0)
+  const intervalRef     = useRef(null)
+  const startRef        = useRef(null)
+  const realBaseRef     = useRef(0)
+  const stepStartRef    = useRef(null)
+  const stepBaseRef     = useRef(0)
+  const stepIdxRef      = useRef(0)
+  const onStepChangeRef = useRef(onStepChange)
+  const onDoneRef       = useRef(onDone)
+  const onStartRef      = useRef(onStart)
+  const onPauseRef      = useRef(onPause)
+  const onResumeRef     = useRef(onResume)
+
+  useEffect(() => { onStepChangeRef.current = onStepChange }, [onStepChange])
+  useEffect(() => { onDoneRef.current = onDone }, [onDone])
+  useEffect(() => { onStartRef.current = onStart }, [onStart])
+  useEffect(() => { onPauseRef.current = onPause }, [onPause])
+  useEffect(() => { onResumeRef.current = onResume }, [onResume])
 
   const currentStep = STEPS[Math.min(stepIdx, STEPS.length - 1)]
 
   const tick = useCallback(() => {
-    const now  = Date.now()
-    const total = baseRef.current + Math.floor((now - startRef.current) / 1000)
-    const clamped = Math.min(total, TOTAL)
-    setElapsed(clamped)
+    const now = Date.now()
 
-    // which step are we in?
-    let acc = 0
-    for (let i = 0; i < STEPS.length; i++)
-    {
-      if (clamped < acc + STEPS[i].target)
-      {
-        setStepIdx(i)
-        setStepElapsed(clamped - acc)
-        break
-      }
+    const real = realBaseRef.current + Math.floor((now - startRef.current) / 1000)
+    setRealElapsed(real)
 
-      acc += STEPS[i].target
+    const se = stepBaseRef.current + Math.floor((now - stepStartRef.current) / 1000)
+    setStepElapsed(se)
+
+    const currentTarget = STEPS[stepIdxRef.current].target
+    if (se >= currentTarget && stepIdxRef.current < STEPS.length - 1) {
+      const nextIdx = stepIdxRef.current + 1
+      stepIdxRef.current = nextIdx
+      setStepIdx(nextIdx)
+      stepStartRef.current = now
+      stepBaseRef.current  = 0
+      onStepChangeRef.current?.(nextIdx)
     }
 
-    if (clamped >= TOTAL)
-    {
-      clearInterval(intervalRef.current)
-     
-      setState('done')
-     
-      onDone?.()
+    if (stepIdxRef.current === STEPS.length - 1) {
+      const lastSe = stepBaseRef.current + Math.floor((now - stepStartRef.current) / 1000)
+      if (lastSe >= STEPS[STEPS.length - 1].target) {
+        clearInterval(intervalRef.current)
+        setState('done')
+        onDoneRef.current?.()
+      }
     }
   }, [])
 
   const start = () => {
-    startRef.current = Date.now()
-    baseRef.current  = elapsed
-    intervalRef.current = setInterval(tick, 250)
-
+    const now = Date.now()
+    startRef.current     = now
+    stepStartRef.current = now
+    intervalRef.current  = setInterval(tick, 250)
     setState('running')
+    onStartRef.current?.()
   }
 
   const pause = () => {
     clearInterval(intervalRef.current)
-    baseRef.current = elapsed
-
+    const now = Date.now()
+    realBaseRef.current += Math.floor((now - startRef.current) / 1000)
+    stepBaseRef.current += Math.floor((now - stepStartRef.current) / 1000)
     setState('paused')
+    onPauseRef.current?.()
+  }
+
+  const resume = () => {
+    const now = Date.now()
+    startRef.current     = now
+    stepStartRef.current = now
+    intervalRef.current  = setInterval(tick, 250)
+    setState('running')
+    onResumeRef.current?.()
   }
 
   const reset = () => {
     clearInterval(intervalRef.current)
     setState('idle')
-    setElapsed(0)
+    setRealElapsed(0)
     setStepIdx(0)
     setStepElapsed(0)
-    baseRef.current = 0
+    stepIdxRef.current   = 0
+    realBaseRef.current  = 0
+    stepBaseRef.current  = 0
+    startRef.current     = null
+    stepStartRef.current = null
   }
 
   const skipStep = () => {
-    if (stepIdx >= STEPS.length - 1)
-    { 
-      return
-    }
-
-    const nextStepStart = STEPS.slice(0, stepIdx + 1).reduce((a, x) => a + x.target, 0)
-    baseRef.current = nextStepStart
-    startRef.current = Date.now()
-
-    setElapsed(nextStepStart)
-    setStepIdx(stepIdx + 1)
+    if (stepIdxRef.current >= STEPS.length - 1) return
+    const now     = Date.now()
+    const nextIdx = stepIdxRef.current + 1
+    stepIdxRef.current   = nextIdx
+    setStepIdx(nextIdx)
+    stepStartRef.current = now
+    stepBaseRef.current  = 0
     setStepElapsed(0)
+    onStepChangeRef.current?.(nextIdx)
   }
 
   useEffect(() => () => clearInterval(intervalRef.current), [])
 
-  // step progress ring
-  const stepProgress = stepElapsed / currentStep.target
-  const R = 54
+  const R    = 54
   const CIRC = 2 * Math.PI * R
-  const dash = CIRC * (1 - stepProgress)
-
-  // total arc (thin outer)
-  const totalProgress = elapsed / TOTAL
-  const dashTotal = CIRC * (1 - totalProgress)
+  const totalProgress = Math.min(realElapsed / TOTAL, 1)
+  const dashTotal     = CIRC * (1 - totalProgress)
+  const stepProgress  = Math.min(stepElapsed / currentStep.target, 1)
+  const dash          = CIRC * (1 - stepProgress)
 
   return (
     <div className={styles.wrap}>
-      {/* Big ring */}
       <div className={styles.ring}>
         <svg viewBox="0 0 128 128" className={styles.svg}>
-          {/* background track */}
           <circle cx="64" cy="64" r={R} fill="none" stroke="var(--border)" strokeWidth="6" />
-          {/* total progress (thin) */}
           <circle cx="64" cy="64" r={R} fill="none" stroke="var(--c200)" strokeWidth="2"
             strokeDasharray={CIRC} strokeDashoffset={dashTotal}
             strokeLinecap="round" transform="rotate(-90 64 64)"
             style={{ transition: 'stroke-dashoffset .25s linear' }} />
-          {/* step progress (thick) */}
           <circle cx="64" cy="64" r={R} fill="none" stroke={currentStep.colour} strokeWidth="6"
             strokeDasharray={CIRC} strokeDashoffset={dash}
             strokeLinecap="round" transform="rotate(-90 64 64)"
@@ -131,21 +150,19 @@ export default function BrewTimer({ onDone } = {}) {
             <span className={styles.doneIcon}>✓</span>
           ) : (
             <>
-              <span className={styles.elapsed}>{fmt(elapsed)}</span>
+              <span className={styles.elapsed}>{fmt(realElapsed)}</span>
               <span className={styles.total}>/ {fmt(TOTAL)}</span>
             </>
           )}
         </div>
       </div>
 
-      {/* Step indicator */}
       <div className={styles.stepDots}>
         {STEPS.map((s, i) => (
           <div key={i} className={`${styles.dot} ${i < stepIdx ? styles.dotDone : ''} ${i === stepIdx && state !== 'idle' && state !== 'done' ? styles.dotActive : ''}`} />
         ))}
       </div>
 
-      {/* Current step card */}
       <div className={styles.cueCard} style={state !== 'idle' && state !== 'done' ? { borderColor: currentStep.colour + '44' } : {}}>
         {state === 'idle' && (
           <>
@@ -171,11 +188,10 @@ export default function BrewTimer({ onDone } = {}) {
         )}
       </div>
 
-      {/* Step timeline */}
       <div className={styles.timeline}>
         {STEPS.map((s, i) => {
           const start = STEPS.slice(0, i).reduce((a, x) => a + x.target, 0)
-          const done = elapsed >= start + s.target
+          const done   = i < stepIdx || (i === stepIdx && state === 'done')
           const active = i === stepIdx && state !== 'idle' && state !== 'done'
           return (
             <div key={i} className={`${styles.timelineItem} ${done ? styles.timelineDone : ''} ${active ? styles.timelineActive : ''}`}>
@@ -186,7 +202,6 @@ export default function BrewTimer({ onDone } = {}) {
         })}
       </div>
 
-      {/* Controls */}
       <div className={styles.controls}>
         {state === 'idle' && (
           <button className={styles.btnPrimary} onClick={start}>Start brew</button>
@@ -202,7 +217,7 @@ export default function BrewTimer({ onDone } = {}) {
         )}
         {state === 'paused' && (
           <>
-            <button className={styles.btnPrimary} onClick={start}>Resume</button>
+            <button className={styles.btnPrimary} onClick={resume}>Resume</button>
             <button className={styles.btnGhost} onClick={reset}>Reset</button>
           </>
         )}

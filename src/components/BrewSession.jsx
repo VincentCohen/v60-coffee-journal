@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import BrewTimer from './BrewTimer.jsx'
 import styles from './BrewSession.module.css'
 
@@ -16,12 +16,16 @@ const EMPTY_TASTING = {
 }
 
 export default function BrewSession({ onSave, getBeanMemory }) {
-  const [phase, setPhase] = useState('setup') // 'setup' | 'timer' | 'tasting'
-  const [setup, setSetup] = useState(EMPTY_SETUP)
-  const [tasting, setTasting] = useState(EMPTY_TASTING)
-  const [beanHint, setBeanHint] = useState(null)
+  const [phase, setPhase]                 = useState('setup')
+  const [setup, setSetup]                 = useState(EMPTY_SETUP)
+  const [tasting, setTasting]             = useState(EMPTY_TASTING)
+  const [beanHint, setBeanHint]           = useState(null)
   const [hintDismissed, setHintDismissed] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [saved, setSaved]                 = useState(false)
+  const timerStartRef    = useRef(null)
+  const timerBaseRef     = useRef(0)
+  const timerPausedRef   = useRef(true)
+  const drawdownStartRef = useRef(999999)
 
   const setS = (k, v) => setSetup(p => ({ ...p, [k]: v }))
   const setT = (k, v) => setTasting(p => ({ ...p, [k]: v }))
@@ -49,19 +53,74 @@ export default function BrewSession({ onSave, getBeanMemory }) {
     setHintDismissed(true)
   }
 
-  const startBrew = () => {
-    if (!setup.bean.trim()) { alert('Please enter the bean or origin.'); return }
-    setPhase('timer')
+  const getLiveElapsed = () => {
+    if (timerPausedRef.current || timerStartRef.current === null) return timerBaseRef.current
+    return timerBaseRef.current + Math.floor((Date.now() - timerStartRef.current) / 1000)
+  }
+
+  const handleTimerStart = () => {
+    timerStartRef.current  = Date.now()
+    timerPausedRef.current = false
+  }
+
+  const handleTimerPause = () => {
+    timerBaseRef.current  += Math.floor((Date.now() - timerStartRef.current) / 1000)
+    timerPausedRef.current = true
+  }
+
+  const handleTimerResume = () => {
+    timerStartRef.current  = Date.now()
+    timerPausedRef.current = false
+  }
+
+  const handleStepChange = (idx) => {
+    if (idx === 3) {
+      drawdownStartRef.current = getLiveElapsed()
+    }
+  }
+
+  const getDrawdownString = () => {
+    const secs = Math.max(0, getLiveElapsed() - drawdownStartRef.current)
+    if (secs === 0) return ''
+    const m = Math.floor(secs / 60)
+    const s = secs % 60
+    return `${m}:${String(s).padStart(2, '0')}`
   }
 
   const handleTimerDone = () => {
+    const drawdown = getDrawdownString()
+    setSetup(p => ({ ...p, drawdown }))
     setPhase('tasting')
   }
 
+  const handleSkipToTasting = () => {
+    const elapsed = getLiveElapsed()
+
+    const drawdownStart = drawdownStartRef.current === 999999 ? 0 : drawdownStartRef.current
+    const secs = Math.max(0, elapsed - drawdownStart)
+    const m = Math.floor(secs / 60)
+    const s = secs % 60
+    const drawdown = secs > 0 ? `${m}:${String(s).padStart(2, '0')}` : ''
+ 
+    setSetup(p => ({ ...p, drawdown }))
+    setPhase('tasting')
+  }
+
+  const startBrew = () => {
+    if (!setup.bean.trim()) { alert('Please enter the bean or origin.'); return }
+    timerStartRef.current    = null
+    timerBaseRef.current     = 0
+    timerPausedRef.current   = true
+    drawdownStartRef.current = 999999
+    setPhase('timer')
+  }
+
   const handleSave = () => {
+    const drawdown = setup.drawdown
     onSave({
       ...setup,
       ...tasting,
+      drawdown,
       date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
     })
     setSaved(true)
@@ -79,6 +138,10 @@ export default function BrewSession({ onSave, getBeanMemory }) {
     setSetup(EMPTY_SETUP)
     setTasting(EMPTY_TASTING)
     setHintDismissed(false)
+    timerStartRef.current    = null
+    timerBaseRef.current     = 0
+    timerPausedRef.current   = true
+    drawdownStartRef.current = 999999
   }
 
   // ── Setup ──────────────────────────────────────────────
@@ -144,17 +207,15 @@ export default function BrewSession({ onSave, getBeanMemory }) {
         <legend className={styles.legend}>Parameters</legend>
         <div className={styles.row4}>
           {[
-            ['Dose (g)',  'dose',     'number', '10',  '25',  '0.1'],
-            ['Water (g)', 'water',    'number', '100', '400', '5'  ],
-            ['Temp (°C)', 'temp',     'number', '80',  '100', '1'  ],
-            ['Drawdown',  'drawdown', 'text',   null,  null,  null ],
+            ['Dose (g)',  'dose',  'number', '10',  '25',  '0.1'],
+            ['Water (g)', 'water', 'number', '100', '400', '5'  ],
+            ['Temp (°C)', 'temp',  'number', '80',  '100', '1'  ],
           ].map(([lbl, key, type, min, max, step]) => (
             <div key={key} className={styles.field}>
               <label>{lbl}</label>
               <input
                 type={type}
                 value={setup[key]}
-                placeholder={key === 'drawdown' ? '3:20' : undefined}
                 min={min} max={max} step={step}
                 onChange={e => setS(key, e.target.value)}
               />
@@ -178,8 +239,14 @@ export default function BrewSession({ onSave, getBeanMemory }) {
         </span>
         <h2 className={styles.phaseTitle}>Brewing</h2>
       </div>
-      <BrewTimer onDone={handleTimerDone} />
-      <button className={styles.skipTasting} onClick={() => setPhase('tasting')}>
+      <BrewTimer
+        onStart={handleTimerStart}
+        onPause={handleTimerPause}
+        onResume={handleTimerResume}
+        onStepChange={handleStepChange}
+        onDone={handleTimerDone}
+      />
+      <button className={styles.skipTasting} onClick={handleSkipToTasting}>
         Skip to tasting →
       </button>
     </div>
@@ -238,6 +305,18 @@ export default function BrewSession({ onSave, getBeanMemory }) {
         <legend className={styles.legend}>Notes</legend>
         <textarea placeholder="How did it taste? What would you change?"
           value={tasting.notes} onChange={e => setT('notes', e.target.value)} />
+      </fieldset>
+
+      <fieldset className={styles.group}>
+        <legend className={styles.legend}>Drawdown time</legend>
+        <div className={styles.field}>
+          <input
+            type="text"
+            placeholder="e.g. 3:20"
+            value={setup.drawdown}
+            onChange={e => setS('drawdown', e.target.value)}
+          />
+        </div>
       </fieldset>
 
       <div className={styles.tastingActions}>
