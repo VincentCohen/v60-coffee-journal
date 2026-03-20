@@ -37,6 +37,7 @@ export default function Login({ onClose }) {
           <span className={styles.titleJust}>just </span>
           <span className={styles.titlePoured}>poured</span>
         </h1>
+        <p className={styles.tagline}>Coffee Journal</p>
 
         {isSignUp ? <p className={styles.sub}>Create your account</p> : <p className={styles.sub}>Sign in to your account</p>}
         

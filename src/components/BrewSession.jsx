@@ -30,6 +30,7 @@ function secsToString(secs) {
 export default function BrewSession({ onSave, getBeanMemory, beans = [], allRecipes = [], activeRecipe = null, initialBean = null, onBeanConsumed }) {
   const [phase, setPhase]                     = useState('setup')
   const [selectedRecipe, setSelectedRecipe]   = useState(activeRecipe)
+  const [userPickedRecipe, setUserPickedRecipe] = useState(false)
   const [setup, setSetup]                     = useState(() => emptySetup(activeRecipe))
   const [tasting, setTasting]                 = useState(EMPTY_TASTING)
   const [beanHint, setBeanHint]               = useState(null)
@@ -48,7 +49,7 @@ export default function BrewSession({ onSave, getBeanMemory, beans = [], allReci
 
   // Keep selectedRecipe in sync when activeRecipe loads/changes (only if user hasn't manually picked one)
   useEffect(() => {
-    if (activeRecipe && !selectedRecipe) {
+    if (activeRecipe && !userPickedRecipe) {
       setSelectedRecipe(activeRecipe)
       setSetup(p => ({ ...p, dose: String(activeRecipe.doseG), water: String(activeRecipe.waterG), temp: String(activeRecipe.tempC) }))
     }
@@ -89,6 +90,7 @@ export default function BrewSession({ onSave, getBeanMemory, beans = [], allReci
     const recipe = allRecipes.find(r => r.id === recipeId)
     if (recipe) {
       setSelectedRecipe(recipe)
+      setUserPickedRecipe(true)
       setSetup(p => ({
         ...p,
         dose:  String(recipe.doseG),
@@ -148,6 +150,7 @@ export default function BrewSession({ onSave, getBeanMemory, beans = [], allReci
       setTasting(EMPTY_TASTING)
       setHintDismissed(false)
       setSelectedBeanId(null)
+      setUserPickedRecipe(false)
       setSaved(false)
     }, 1800)
   }
@@ -158,6 +161,7 @@ export default function BrewSession({ onSave, getBeanMemory, beans = [], allReci
     setTasting(EMPTY_TASTING)
     setHintDismissed(false)
     setSelectedBeanId(null)
+    setUserPickedRecipe(false)
     getTotalSecsRef.current = null
   }
 

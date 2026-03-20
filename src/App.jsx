@@ -8,16 +8,17 @@ import Login           from './components/Login.jsx'
 import BrewSession     from './components/BrewSession.jsx'
 import Beans           from './components/Beans.jsx'
 import RecipeManager   from './components/RecipeManager.jsx'
+import Settings        from './components/Settings.jsx'
 import { useJournal } from './hooks/useJournal.js'
 import Logo from './components/Logo.jsx'
 import styles from './App.module.css'
 
 const TABS = [
-  { path: '/brew',    icon: '☕', label: 'Brew'    },
-  { path: '/timer',   icon: '⏱', label: 'Timer'   },
-  { path: '/guide',   icon: '📋', label: 'Recipes' },
+  { path: '/guide',    icon: '📋', label: 'Recipes' },
   { path: '/beans',   icon: '🫘', label: 'Beans'   },
+  { path: '/brew',    icon: '☕', label: 'Brew', center: true },
   { path: '/journal', icon: '📖', label: 'Journal' },
+  { path: '/settings', icon: '⋯', label: 'More'   },
 ]
 
 export default function App() {
@@ -90,17 +91,31 @@ export default function App() {
       <main className={styles.main}>
         <div className={styles.page}>
           <Routes>
-            <Route path="/" element={<Navigate to="/timer" replace />} />
+            <Route path="/" element={<Navigate to="/brew" replace />} />
             <Route path="/brew" element={
-              <BrewSession
-                onSave={handleSave}
-                getBeanMemory={getBeanMemory}
-                beans={beans}
-                allRecipes={[JH_RECIPE, ...recipes]}
-                activeRecipe={activeRecipe}
-                initialBean={brewWithBean}
-                onBeanConsumed={() => setBrewWithBean(null)}
-              />
+              <>
+                <div className={styles.timerCard}>
+                  <div className={styles.timerCardInfo}>
+                    <span className={styles.timerCardLabel}>Quick Timer</span>
+                    <span className={styles.timerCardRecipe}>{activeRecipe.name}</span>
+                    <span className={styles.timerCardMeta}>
+                      {activeRecipe.steps.length} steps · {Math.floor(activeRecipe.steps.reduce((s, x) => s + x.duration, 0) / 60)}:{String(activeRecipe.steps.reduce((s, x) => s + x.duration, 0) % 60).padStart(2, '0')} min
+                    </span>
+                  </div>
+                  <button className={styles.timerCardBtn} onClick={() => navigate('/timer')}>
+                    Start →
+                  </button>
+                </div>
+                <BrewSession
+                  onSave={handleSave}
+                  getBeanMemory={getBeanMemory}
+                  beans={beans}
+                  allRecipes={[JH_RECIPE, ...recipes]}
+                  activeRecipe={activeRecipe}
+                  initialBean={brewWithBean}
+                  onBeanConsumed={() => setBrewWithBean(null)}
+                />
+              </>
             } />
             <Route path="/timer" element={<BrewTimer recipe={activeRecipe} />} />
             <Route path="/guide" element={
@@ -144,7 +159,15 @@ export default function App() {
                 getBeanMemory={getBeanMemory}
               />
             } />
-            <Route path="*" element={<Navigate to="/timer" replace />} />
+            <Route path="/settings" element={
+              <Settings
+                user={user}
+                theme={theme}
+                onCycleTheme={cycleTheme}
+                onSignOut={signOut}
+              />
+            } />
+            <Route path="*" element={<Navigate to="/brew" replace />} />
           </Routes>
         </div>
       </main>
@@ -166,9 +189,11 @@ export default function App() {
             key={t.path}
             to={t.path}
             end={t.path === '/beans' ? false : true}
-            className={({ isActive }) => `${styles.navBtn} ${isActive ? styles.navBtnActive : ''}`}
+            className={({ isActive }) =>
+              `${styles.navBtn} ${t.center ? styles.navBtnCenter : ''} ${isActive ? styles.navBtnActive : ''}`
+            }
           >
-            <span className={styles.navIcon}>{t.icon}</span>
+            <span className={t.center ? styles.navIconCenter : styles.navIcon}>{t.icon}</span>
             <span className={styles.navLabel}>
               {t.label}
               {t.path === '/journal' && entries.length > 0 && (

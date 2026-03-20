@@ -9,11 +9,11 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding-top: 4px;
+  padding-top: 10px;
 }
 
 .phaseLabel {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: .06em;
   text-transform: uppercase;
@@ -21,7 +21,7 @@
 }
 
 .phaseTitle {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text);
   margin: 0;
