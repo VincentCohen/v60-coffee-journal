@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../supabase.js'
+import Logo from './Logo.jsx'
 import styles from './Login.module.css'
 
 export default function Login({ onClose }) {
@@ -31,9 +32,14 @@ export default function Login({ onClose }) {
   return (
     <div className={styles.wrap}>
       <div className={styles.card}>
-        <div className={styles.icon}>☕</div>
-        <h1 className={styles.title}>V60 Journal</h1>
-        <p className={styles.sub}>James Hoffman's recipe</p>
+        <Logo size={96} className={styles.logo} />
+        <h1 className={styles.title}>
+          <span className={styles.titleJust}>just </span>
+          <span className={styles.titlePoured}>poured</span>
+        </h1>
+
+        {isSignUp ? <p className={styles.sub}>Create your account</p> : <p className={styles.sub}>Sign in to your account</p>}
+        
 
         <div className={styles.fields}>
           <input
@@ -60,10 +66,6 @@ export default function Login({ onClose }) {
 
         <button className={styles.toggle} onClick={() => setIsSignUp(s => !s)}>
           {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
-        </button>
-
-        <button className={styles.skip} onClick={onClose}>
-          Continue without account
         </button>
 
       </div>

@@ -1,0 +1,160 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 32px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 4px;
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.newBtn {
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--r-md);
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: opacity .15s;
+}
+
+.newBtn:hover { opacity: .85; }
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Recipe card ────────────────────────────────────── */
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cardActive {
+  border-color: var(--c500);
+}
+
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cardName {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.activeBadge {
+  background: rgba(var(--c500-rgb, 160,120,80), .15);
+  color: var(--c600);
+  border: 1px solid rgba(var(--c500-rgb, 160,120,80), .3);
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.cardActions {
+  display: flex;
+  gap: 4px;
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  color: var(--text-3);
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: color .15s;
+}
+
+.iconBtn:hover { color: var(--text); }
+
+.cardStats {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.cardDesc {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+/* ── Step list in card ──────────────────────────────── */
+
+.cardSteps {
+  background: var(--bg-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.stepRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+}
+
+.stepRow:last-child { border-bottom: none; }
+
+.stepLabel { font-weight: 500; }
+
+.stepMeta { color: var(--text-2); }
+
+/* ── Activate button ────────────────────────────────── */
+
+.activateBtn {
+  background: var(--bg-muted);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-md);
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  color: var(--text);
+  cursor: pointer;
+  width: 100%;
+  transition: background .15s;
+}
+
+.activateBtn:hover { background: var(--border); }

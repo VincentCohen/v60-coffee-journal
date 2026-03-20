@@ -1,0 +1,187 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 32px;
+}
+
+.header { padding-top: 4px; }
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+textarea {
+  min-height: 68px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.row3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+/* ── Steps section ──────────────────────────────────── */
+
+.stepsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stepsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stepsTitle {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.stepsSummary {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-2);
+}
+
+.addStepBtn {
+  background: var(--bg-muted);
+  border: 1px solid var(--border-md);
+  border-radius: var(--r-md);
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  color: var(--text);
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.addStepBtn:hover { background: var(--border); }
+
+.stepsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stepCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stepCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepNum {
+  background: var(--bg-muted);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-2);
+  flex-shrink: 0;
+}
+
+.stepReorder {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.stepReorder button {
+  background: var(--bg-muted);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text-2);
+  font-family: var(--font-sans);
+}
+
+.stepReorder button:disabled { opacity: .35; cursor: default; }
+.stepReorder button:not(:disabled):hover { background: var(--border); }
+
+.removeStep {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 5px;
+}
+
+.removeStep:hover { color: #e53e3e; }
+
+.stepRow2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+/* ── Actions ────────────────────────────────────────── */
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.cancelBtn, .saveBtn {
+  padding: 13px;
+  border-radius: var(--r-md);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: none;
+  transition: opacity .15s;
+}
+
+.cancelBtn {
+  background: var(--bg-muted);
+  border: 1px solid var(--border-md);
+  color: var(--text);
+}
+
+.saveBtn {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.cancelBtn:hover, .saveBtn:hover { opacity: .85; }
+.cancelBtn:disabled, .saveBtn:disabled { opacity: .5; cursor: not-allowed; }

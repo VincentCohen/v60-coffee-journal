@@ -16,22 +16,26 @@
   gap: 0;
 }
 
-.icon {
-  font-size: 40px;
-  margin-bottom: 1rem;
+.logo {
+  color: var(--c600);
+  margin-bottom: 0.75rem;
 }
 
 .title {
-  font-family: var(--font-serif);
-  font-size: 28px;
-  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -.4px;
   margin-bottom: 4px;
 }
 
+.titleJust   { color: var(--text-2); }
+.titlePoured { color: var(--c500); }
+
 .sub {
-  font-size: 13px;
+  font-size: 16px;
   color: var(--text-3);
-  font-style: italic;
+
   margin-bottom: 2rem;
 }
 

@@ -1,34 +1,45 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { Routes, Route, NavLink, useNavigate, Navigate } from 'react-router-dom'
 import { supabase } from './supabase.js'
-import BrewGuide from './components/BrewGuide.jsx'
-import BrewTimer from './components/BrewTimer.jsx'
-import LogForm   from './components/LogForm.jsx'
-import Journal   from './components/Journal.jsx'
-import Login     from './components/Login.jsx'
-import BrewSession from './components/BrewSession.jsx'
+import { JH_RECIPE } from './defaultRecipe.js'
+import BrewTimer       from './components/BrewTimer.jsx'
+import Journal         from './components/Journal.jsx'
+import Login           from './components/Login.jsx'
+import BrewSession     from './components/BrewSession.jsx'
+import Beans           from './components/Beans.jsx'
+import RecipeManager   from './components/RecipeManager.jsx'
 import { useJournal } from './hooks/useJournal.js'
+import Logo from './components/Logo.jsx'
 import styles from './App.module.css'
 
 const TABS = [
-  { id: 'brew',    icon: '☕', label: 'Brew'    },
-  { id: 'timer',   icon: '⏱', label: 'Timer'   },
-  { id: 'guide',   icon: '☕', label: 'Recipe'  },
-  { id: 'log',     icon: '✏️', label: 'Log'     },
-  { id: 'journal', icon: '📖', label: 'Journal' },
+  { path: '/brew',    icon: '☕', label: 'Brew'    },
+  { path: '/timer',   icon: '⏱', label: 'Timer'   },
+  { path: '/guide',   icon: '📋', label: 'Recipes' },
+  { path: '/beans',   icon: '🫘', label: 'Beans'   },
+  { path: '/journal', icon: '📖', label: 'Journal' },
 ]
 
 export default function App() {
-  const [tab, setTab]             = useState('timer')
-  const [user, setUser]           = useState(null)
-  const [loading, setLoading]     = useState(true)
-  const [showLogin, setShowLogin] = useState(false)
+  const [user, setUser]                 = useState(null)
+  const [loading, setLoading]           = useState(true)
+  const [brewWithBean, setBrewWithBean] = useState(null)
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('theme') || 'system'
     document.documentElement.setAttribute('data-theme', saved)
     return saved
   })
 
-  const { entries, addEntry, deleteEntry, exportData, importData, getBeanMemory } = useJournal(user)
+  const navigate = useNavigate()
+  const {
+    entries, beans, recipes, activeRecipeId,
+    addEntry, deleteEntry, exportData, importData, getBeanMemory,
+    addBean, updateBean, deleteBean,
+    addRecipe, updateRecipe, deleteRecipe, setActiveRecipe,
+  } = useJournal(user)
+
+  // Resolve active recipe — fall back to JH default
+  const activeRecipe = (activeRecipeId && recipes.find(r => r.id === activeRecipeId)) || JH_RECIPE
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -38,7 +49,6 @@ export default function App() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
-      if (session?.user) setShowLogin(false)
     })
 
     return () => subscription.unsubscribe()
@@ -46,7 +56,12 @@ export default function App() {
 
   const handleSave = (entry) => {
     addEntry(entry)
-    setTab('journal')
+    navigate('/journal')
+  }
+
+  const handleBrewWithBean = (bean) => {
+    setBrewWithBean(bean)
+    navigate('/brew')
   }
 
   const cycleTheme = () => {
@@ -68,70 +83,115 @@ export default function App() {
     )
   }
 
-  if (showLogin && !user) {
-    return <Login onClose={() => setShowLogin(false)} />
-  }
+  if (!user) return <Login />
 
   return (
     <div className={styles.app}>
       <main className={styles.main}>
         <div className={styles.page}>
-          {tab === 'brew'    && <BrewSession onSave={handleSave} getBeanMemory={getBeanMemory} />}
-          {tab === 'timer'   && <BrewTimer />}
-          {tab === 'log'     && <LogForm onSave={addEntry} getBeanMemory={getBeanMemory} />}
-          {tab === 'guide'   && <BrewGuide />}
-          {tab === 'journal' && (
-            <Journal
-              entries={entries}
-              onDelete={deleteEntry}
-              onExport={exportData}
-              onImport={importData}
-            />
-          )}
+          <Routes>
+            <Route path="/" element={<Navigate to="/timer" replace />} />
+            <Route path="/brew" element={
+              <BrewSession
+                onSave={handleSave}
+                getBeanMemory={getBeanMemory}
+                beans={beans}
+                allRecipes={[JH_RECIPE, ...recipes]}
+                activeRecipe={activeRecipe}
+                initialBean={brewWithBean}
+                onBeanConsumed={() => setBrewWithBean(null)}
+              />
+            } />
+            <Route path="/timer" element={<BrewTimer recipe={activeRecipe} />} />
+            <Route path="/guide" element={
+              <RecipeManager
+                recipes={recipes}
+                activeRecipeId={activeRecipeId || JH_RECIPE.id}
+                onAdd={addRecipe}
+                onUpdate={updateRecipe}
+                onDelete={deleteRecipe}
+                onActivate={setActiveRecipe}
+              />
+            } />
+            <Route path="/beans" element={
+              <Beans
+                beans={beans}
+                entries={entries}
+                onAdd={addBean}
+                onUpdate={updateBean}
+                onDelete={deleteBean}
+                onBrewWith={handleBrewWithBean}
+              />
+            } />
+            <Route path="/beans/:id" element={
+              <Beans
+                beans={beans}
+                entries={entries}
+                onAdd={addBean}
+                onUpdate={updateBean}
+                onDelete={deleteBean}
+                onBrewWith={handleBrewWithBean}
+              />
+            } />
+            <Route path="/journal" element={
+              <Journal
+                entries={entries}
+                beans={beans}
+                onDelete={deleteEntry}
+                onExport={exportData}
+                onImport={importData}
+                onSave={addEntry}
+                getBeanMemory={getBeanMemory}
+              />
+            } />
+            <Route path="*" element={<Navigate to="/timer" replace />} />
+          </Routes>
         </div>
       </main>
 
       <nav className={styles.nav}>
         <header className={styles.header}>
-          <h1 className={styles.title}>V60 Journal</h1>
-          <p className={styles.sub}>James Hoffman's recipe</p>
+          <div className={styles.brand}>
+            <Logo size={56} className={styles.brandLogo} />
+            <h1 className={styles.title}>
+              <span className={styles.titleJust}>just </span>
+              <span className={styles.titlePoured}>poured</span>
+            </h1>
+            <p className={styles.sub}>Coffee Journal</p>
+          </div>
         </header>
 
         {TABS.map(t => (
-          <button
-            key={t.id}
-            className={`${styles.navBtn} ${tab === t.id ? styles.navBtnActive : ''}`}
-            onClick={() => setTab(t.id)}
+          <NavLink
+            key={t.path}
+            to={t.path}
+            end={t.path === '/beans' ? false : true}
+            className={({ isActive }) => `${styles.navBtn} ${isActive ? styles.navBtnActive : ''}`}
           >
             <span className={styles.navIcon}>{t.icon}</span>
             <span className={styles.navLabel}>
               {t.label}
-              {t.id === 'journal' && entries.length > 0 && (
+              {t.path === '/journal' && entries.length > 0 && (
                 <span className={styles.badge}>{entries.length}</span>
               )}
+              {t.path === '/beans' && beans.length > 0 && (
+                <span className={styles.badge}>{beans.length}</span>
+              )}
             </span>
-          </button>
+          </NavLink>
         ))}
 
         <div className={styles.navSpacer} />
 
         <button className={styles.themeBtn} onClick={cycleTheme}>
-          <span>{theme === 'dark' ? '☀️' : theme === 'light' ? '⚙️' : '🌙'}</span>
-          <span>{theme === 'dark' ? 'Light mode' : theme === 'light' ? 'System' : 'Dark mode'}</span>
+          <span>{theme === 'dark' ? '🌙' : theme === 'light' ? '☀️' : '⚙️'}</span>
+          <span>{theme === 'dark' ? 'Dark mode' : theme === 'light' ? 'Light mode' : 'System'}</span>
         </button>
 
-        {!user ? (
-          <button className={styles.signInBtn} onClick={() => setShowLogin(true)}>
-            <span>☁️</span>
-            <span>Sign in to sync</span>
-          </button>
-        ) : (
-          <button className={styles.signOutBtn} onClick={signOut}>
-            <span>👋</span>
-            <span>Sign out</span>
-          </button>
-        )}
-
+        <button className={styles.signOutBtn} onClick={signOut}>
+          <span>👋</span>
+          <span>Sign out</span>
+        </button>
       </nav>
     </div>
   )

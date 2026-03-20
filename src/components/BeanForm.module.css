@@ -1,0 +1,108 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 32px;
+}
+
+.header {
+  padding-top: 4px;
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.sub {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.modeToggle {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.modeBtn, .modeActive {
+  padding: 6px 14px;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: 1px solid var(--border-md);
+  transition: background .15s;
+}
+
+.modeBtn    { background: var(--bg-muted); color: var(--text-2); }
+.modeActive { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+.priceRow {
+  display: flex;
+  gap: 6px;
+}
+
+.currencySelect {
+  width: 80px;
+  flex-shrink: 0;
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.cancelBtn, .saveBtn {
+  padding: 13px;
+  border-radius: var(--r-md);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: none;
+  transition: opacity .15s;
+}
+
+.cancelBtn {
+  background: var(--bg-muted);
+  border: 1px solid var(--border-md);
+  color: var(--text);
+}
+
+.saveBtn {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.cancelBtn:hover, .saveBtn:hover { opacity: .85; }
+.cancelBtn:disabled, .saveBtn:disabled { opacity: .5; cursor: not-allowed; }

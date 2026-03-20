@@ -4,28 +4,40 @@ import styles from './BrewSession.module.css'
 
 const FLAVORS = ['Chocolate','Caramel','Citrus','Berry','Stone fruit','Floral','Nutty','Honey','Vanilla','Earthy','Tobacco','Winey']
 
-const EMPTY_SETUP = {
-  bean: '', roaster: '', roast: '',
-  grinder: '', grindSetting: '',
-  dose: '15', water: '250', temp: '94', drawdown: '',
-}
-
 const EMPTY_TASTING = {
   acidity: 5, sweetness: 5, body: 5, bitterness: 3,
   flavors: [], rating: 0, notes: '',
 }
 
-export default function BrewSession({ onSave, getBeanMemory }) {
-  const [phase, setPhase]                 = useState('setup')
-  const [setup, setSetup]                 = useState(EMPTY_SETUP)
-  const [tasting, setTasting]             = useState(EMPTY_TASTING)
-  const [beanHint, setBeanHint]           = useState(null)
-  const [hintDismissed, setHintDismissed] = useState(false)
-  const [saved, setSaved]                 = useState(false)
-  const timerStartRef    = useRef(null)
-  const timerBaseRef     = useRef(0)
-  const timerPausedRef   = useRef(true)
-  const drawdownStartRef = useRef(999999)
+function emptySetup(recipe) {
+  return {
+    bean: '', roaster: '', roast: '',
+    grinder: '', grindSetting: '',
+    dose:  String(recipe?.doseG  ?? 15),
+    water: String(recipe?.waterG ?? 250),
+    temp:  String(recipe?.tempC  ?? 94),
+    drawdown: '',
+  }
+}
+
+function secsToString(secs) {
+  if (!secs || secs <= 0) return ''
+  const m = Math.floor(secs / 60)
+  const s = secs % 60
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
+export default function BrewSession({ onSave, getBeanMemory, beans = [], allRecipes = [], activeRecipe = null, initialBean = null, onBeanConsumed }) {
+  const [phase, setPhase]                     = useState('setup')
+  const [selectedRecipe, setSelectedRecipe]   = useState(activeRecipe)
+  const [setup, setSetup]                     = useState(() => emptySetup(activeRecipe))
+  const [tasting, setTasting]                 = useState(EMPTY_TASTING)
+  const [beanHint, setBeanHint]               = useState(null)
+  const [hintDismissed, setHintDismissed]     = useState(false)
+  const [saved, setSaved]                     = useState(false)
+  const [selectedBeanId, setSelectedBeanId]   = useState(null)
+
+  const getTotalSecsRef = useRef(null)
 
   const setS = (k, v) => setSetup(p => ({ ...p, [k]: v }))
   const setT = (k, v) => setTasting(p => ({ ...p, [k]: v }))
@@ -33,6 +45,58 @@ export default function BrewSession({ onSave, getBeanMemory }) {
     ? tasting.flavors.filter(y => y !== x)
     : [...tasting.flavors, x]
   )
+
+  // Keep selectedRecipe in sync when activeRecipe loads/changes (only if user hasn't manually picked one)
+  useEffect(() => {
+    if (activeRecipe && !selectedRecipe) {
+      setSelectedRecipe(activeRecipe)
+      setSetup(p => ({ ...p, dose: String(activeRecipe.doseG), water: String(activeRecipe.waterG), temp: String(activeRecipe.tempC) }))
+    }
+  }, [activeRecipe])
+
+  // Apply initialBean when coming from "Brew with this bean"
+  useEffect(() => {
+    if (initialBean) {
+      setSetup(p => ({
+        ...p,
+        bean: initialBean.name,
+        roaster: initialBean.roaster || '',
+        roast: initialBean.roastLevel || '',
+      }))
+      setSelectedBeanId(initialBean.id)
+      onBeanConsumed?.()
+    }
+  }, [initialBean])
+
+  const selectBean = (beanId) => {
+    const bean = beans.find(b => b.id === beanId)
+    if (bean) {
+      setSetup(p => ({
+        ...p,
+        bean: bean.name,
+        roaster: bean.roaster || '',
+        roast: bean.roastLevel || '',
+      }))
+      setSelectedBeanId(beanId)
+      setBeanHint(null)
+      setHintDismissed(true)
+    } else {
+      setSelectedBeanId(null)
+    }
+  }
+
+  const selectRecipe = (recipeId) => {
+    const recipe = allRecipes.find(r => r.id === recipeId)
+    if (recipe) {
+      setSelectedRecipe(recipe)
+      setSetup(p => ({
+        ...p,
+        dose:  String(recipe.doseG),
+        water: String(recipe.waterG),
+        temp:  String(recipe.tempC),
+      }))
+    }
+  }
 
   useEffect(() => {
     if (hintDismissed) return
@@ -53,95 +117,48 @@ export default function BrewSession({ onSave, getBeanMemory }) {
     setHintDismissed(true)
   }
 
-  const getLiveElapsed = () => {
-    if (timerPausedRef.current || timerStartRef.current === null) return timerBaseRef.current
-    return timerBaseRef.current + Math.floor((Date.now() - timerStartRef.current) / 1000)
-  }
-
-  const handleTimerStart = () => {
-    timerStartRef.current  = Date.now()
-    timerPausedRef.current = false
-  }
-
-  const handleTimerPause = () => {
-    timerBaseRef.current  += Math.floor((Date.now() - timerStartRef.current) / 1000)
-    timerPausedRef.current = true
-  }
-
-  const handleTimerResume = () => {
-    timerStartRef.current  = Date.now()
-    timerPausedRef.current = false
-  }
-
-  const handleStepChange = (idx) => {
-    if (idx === 3) {
-      drawdownStartRef.current = getLiveElapsed()
-    }
-  }
-
-  const getDrawdownString = () => {
-    const secs = Math.max(0, getLiveElapsed() - drawdownStartRef.current)
-    if (secs === 0) return ''
-    const m = Math.floor(secs / 60)
-    const s = secs % 60
-    return `${m}:${String(s).padStart(2, '0')}`
-  }
-
-  const handleTimerDone = () => {
-    const drawdown = getDrawdownString()
-    setSetup(p => ({ ...p, drawdown }))
+  const handleTimerDone = (totalSecs) => {
+    setSetup(p => ({ ...p, drawdown: secsToString(totalSecs) }))
     setPhase('tasting')
   }
 
   const handleSkipToTasting = () => {
-    const elapsed = getLiveElapsed()
-
-    const drawdownStart = drawdownStartRef.current === 999999 ? 0 : drawdownStartRef.current
-    const secs = Math.max(0, elapsed - drawdownStart)
-    const m = Math.floor(secs / 60)
-    const s = secs % 60
-    const drawdown = secs > 0 ? `${m}:${String(s).padStart(2, '0')}` : ''
- 
-    setSetup(p => ({ ...p, drawdown }))
+    const secs = getTotalSecsRef.current?.() ?? 0
+    setSetup(p => ({ ...p, drawdown: secsToString(secs) }))
     setPhase('tasting')
   }
 
   const startBrew = () => {
     if (!setup.bean.trim()) { alert('Please enter the bean or origin.'); return }
-    timerStartRef.current    = null
-    timerBaseRef.current     = 0
-    timerPausedRef.current   = true
-    drawdownStartRef.current = 999999
+    getTotalSecsRef.current = null
     setPhase('timer')
   }
 
   const handleSave = () => {
-    const drawdown = setup.drawdown
     onSave({
       ...setup,
       ...tasting,
-      drawdown,
+      beanId: selectedBeanId || null,
       date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
     })
     setSaved(true)
     setTimeout(() => {
       setPhase('setup')
-      setSetup(EMPTY_SETUP)
+      setSetup(emptySetup(selectedRecipe))
       setTasting(EMPTY_TASTING)
       setHintDismissed(false)
+      setSelectedBeanId(null)
       setSaved(false)
     }, 1800)
   }
 
   const handleDiscard = () => {
     setPhase('setup')
-    setSetup(EMPTY_SETUP)
+    setSetup(emptySetup(selectedRecipe))
     setTasting(EMPTY_TASTING)
     setHintDismissed(false)
-    timerStartRef.current    = null
-    timerBaseRef.current     = 0
-    timerPausedRef.current   = true
-    drawdownStartRef.current = 999999
+    setSelectedBeanId(null)
+    getTotalSecsRef.current = null
   }
 
   // ── Setup ──────────────────────────────────────────────
@@ -150,6 +167,41 @@ export default function BrewSession({ onSave, getBeanMemory }) {
       <div className={styles.phaseHeader}>
         <span className={styles.phaseLabel}>Before you brew</span>
         <h2 className={styles.phaseTitle}>Set up your parameters</h2>
+      </div>
+
+      {/* Bean + Recipe selectors side by side */}
+      <div className={styles.quickSelect}>
+        <div className={styles.quickSelectField}>
+          <label className={styles.quickLabel}>Bean</label>
+          <div className={styles.quickRow}>
+            <select
+              value={selectedBeanId || ''}
+              onChange={e => selectBean(e.target.value || null)}
+            >
+              <option value="">Select bean…</option>
+              {beans.map(b => (
+                <option key={b.id} value={b.id}>
+                  {[b.roaster, b.name].filter(Boolean).join(' · ')}
+                </option>
+              ))}
+            </select>
+            {selectedBeanId && (
+              <button type="button" className={styles.clearBtn} onClick={() => { setSelectedBeanId(null); setHintDismissed(false) }}>✕</button>
+            )}
+          </div>
+        </div>
+
+        <div className={styles.quickSelectField}>
+          <label className={styles.quickLabel}>Recipe</label>
+          <select
+            value={selectedRecipe?.id || ''}
+            onChange={e => selectRecipe(e.target.value)}
+          >
+            {allRecipes.map(r => (
+              <option key={r.id} value={r.id}>{r.name}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {beanHint && (
@@ -240,11 +292,9 @@ export default function BrewSession({ onSave, getBeanMemory }) {
         <h2 className={styles.phaseTitle}>Brewing</h2>
       </div>
       <BrewTimer
-        onStart={handleTimerStart}
-        onPause={handleTimerPause}
-        onResume={handleTimerResume}
-        onStepChange={handleStepChange}
+        recipe={selectedRecipe}
         onDone={handleTimerDone}
+        onRequestTotalSecs={(getFn) => { getTotalSecsRef.current = getFn }}
       />
       <button className={styles.skipTasting} onClick={handleSkipToTasting}>
         Skip to tasting →

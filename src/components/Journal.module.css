@@ -1,5 +1,59 @@
 .journal { display: flex; flex-direction: column; gap: 1rem; }
 
+.journalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 4px;
+}
+
+.journalTitle {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.logBtn {
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--r-md);
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: opacity .15s;
+}
+
+.logBtn:hover { opacity: .85; }
+
+.logHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 4px;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: var(--text-2);
+  font-size: 14px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+}
+
+.backBtn:hover { color: var(--text); }
+
+.logTitle {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 700;
+}
+
 .stats {
   display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
 }
@@ -70,6 +124,7 @@
   color: var(--text-2); padding: 10px 18px; border-radius: var(--r-md);
   font-size: 14px; font-family: var(--font-sans);
   transition: background .15s;
+  cursor: pointer;
 }
 
 .importCta:hover { background: var(--bg-muted); }

@@ -1,14 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { JH_RECIPE } from '../defaultRecipe.js'
 import styles from './BrewTimer.module.css'
 
-const STEPS = [
-  { label: 'Bloom',        cue: 'Pour 50 g — slow spiral, saturate all grounds', target: 45,  pour: '→ 50 g',  colour: '#a07850' },
-  { label: 'First pour',   cue: 'Pour steadily to 150 g — gentle continuous spiral', target: 45, pour: '→ 150 g', colour: '#8a6240' },
-  { label: 'Second pour',  cue: 'Pour to 250 g — slow and steady to finish', target: 60, pour: '→ 250 g', colour: '#6b4e2e' },
-  { label: 'Drawdown',     cue: 'Swirl the dripper gently, then wait for full drawdown', target: 90, pour: null, colour: '#3d2a14' },
-]
+const STEP_COLOURS = ['#a07850', '#8a6240', '#6b4e2e', '#3d2a14', '#2a1a08', '#4a3520']
 
-const TOTAL = STEPS.reduce((s, x) => s + x.target, 0)
+function recipeToSteps(recipe) {
+  return (recipe?.steps || JH_RECIPE.steps).map((s, i) => ({
+    label:  s.label,
+    cue:    s.cue,
+    target: s.duration,
+    pour:   s.pourTarget != null ? `→ ${s.pourTarget} g` : null,
+    colour: STEP_COLOURS[i % STEP_COLOURS.length],
+  }))
+}
 
 function fmt(s) {
   const m = Math.floor(s / 60)
@@ -16,56 +20,72 @@ function fmt(s) {
   return `${m}:${String(sec).padStart(2, '0')}`
 }
 
-export default function BrewTimer({ onDone, onStepChange, onStart, onPause, onResume } = {}) {
+export default function BrewTimer({ recipe, onDone, onStepChange, onStart, onPause, onResume, onRequestTotalSecs } = {}) {
   const [state, setState]             = useState('idle')
   const [realElapsed, setRealElapsed] = useState(0)
   const [stepIdx, setStepIdx]         = useState(0)
   const [stepElapsed, setStepElapsed] = useState(0)
-  const intervalRef     = useRef(null)
-  const startRef        = useRef(null)
-  const realBaseRef     = useRef(0)
-  const stepStartRef    = useRef(null)
-  const stepBaseRef     = useRef(0)
-  const stepIdxRef      = useRef(0)
-  const onStepChangeRef = useRef(onStepChange)
-  const onDoneRef       = useRef(onDone)
-  const onStartRef      = useRef(onStart)
-  const onPauseRef      = useRef(onPause)
-  const onResumeRef     = useRef(onResume)
+
+  const stepsRef = useRef(recipeToSteps(recipe))
+  useEffect(() => {
+    stepsRef.current = recipeToSteps(recipe)
+  }, [recipe])
+
+  const intervalRef        = useRef(null)
+  const startRef           = useRef(null)
+  const realBaseRef        = useRef(0)
+  const stepStartRef       = useRef(null)
+  const stepBaseRef        = useRef(0)
+  const stepIdxRef         = useRef(0)
+  const isPausedRef        = useRef(false)
+
+  const onStepChangeRef       = useRef(onStepChange)
+  const onDoneRef             = useRef(onDone)
+  const onStartRef            = useRef(onStart)
+  const onPauseRef            = useRef(onPause)
+  const onResumeRef           = useRef(onResume)
+  const onRequestTotalSecsRef = useRef(onRequestTotalSecs)
 
   useEffect(() => { onStepChangeRef.current = onStepChange }, [onStepChange])
   useEffect(() => { onDoneRef.current = onDone }, [onDone])
   useEffect(() => { onStartRef.current = onStart }, [onStart])
   useEffect(() => { onPauseRef.current = onPause }, [onPause])
   useEffect(() => { onResumeRef.current = onResume }, [onResume])
+  useEffect(() => { onRequestTotalSecsRef.current = onRequestTotalSecs }, [onRequestTotalSecs])
 
-  const currentStep = STEPS[Math.min(stepIdx, STEPS.length - 1)]
+  const steps = stepsRef.current
+  const currentStep = steps[Math.min(stepIdx, steps.length - 1)]
+  const TOTAL = steps.reduce((s, x) => s + x.target, 0)
+
+  const getTotalSecs = () => {
+    if (isPausedRef.current || startRef.current === null) return realBaseRef.current
+    return realBaseRef.current + Math.floor((Date.now() - startRef.current) / 1000)
+  }
 
   const tick = useCallback(() => {
     const now = Date.now()
-
     const real = realBaseRef.current + Math.floor((now - startRef.current) / 1000)
     setRealElapsed(real)
-
     const se = stepBaseRef.current + Math.floor((now - stepStartRef.current) / 1000)
     setStepElapsed(se)
 
-    const currentTarget = STEPS[stepIdxRef.current].target
-    if (se >= currentTarget && stepIdxRef.current < STEPS.length - 1) {
+    const currentTarget = stepsRef.current[stepIdxRef.current].target
+    if (se >= currentTarget && stepIdxRef.current < stepsRef.current.length - 1) {
       const nextIdx = stepIdxRef.current + 1
-      stepIdxRef.current = nextIdx
+      stepIdxRef.current   = nextIdx
       setStepIdx(nextIdx)
       stepStartRef.current = now
       stepBaseRef.current  = 0
       onStepChangeRef.current?.(nextIdx)
     }
 
-    if (stepIdxRef.current === STEPS.length - 1) {
+    if (stepIdxRef.current === stepsRef.current.length - 1) {
       const lastSe = stepBaseRef.current + Math.floor((now - stepStartRef.current) / 1000)
-      if (lastSe >= STEPS[STEPS.length - 1].target) {
+      if (lastSe >= stepsRef.current[stepsRef.current.length - 1].target) {
         clearInterval(intervalRef.current)
+        const totalSecs = realBaseRef.current + Math.floor((now - startRef.current) / 1000)
         setState('done')
-        onDoneRef.current?.()
+        onDoneRef.current?.(totalSecs)
       }
     }
   }, [])
@@ -74,6 +94,7 @@ export default function BrewTimer({ onDone, onStepChange, onStart, onPause, onRe
     const now = Date.now()
     startRef.current     = now
     stepStartRef.current = now
+    isPausedRef.current  = false
     intervalRef.current  = setInterval(tick, 250)
     setState('running')
     onStartRef.current?.()
@@ -84,6 +105,9 @@ export default function BrewTimer({ onDone, onStepChange, onStart, onPause, onRe
     const now = Date.now()
     realBaseRef.current += Math.floor((now - startRef.current) / 1000)
     stepBaseRef.current += Math.floor((now - stepStartRef.current) / 1000)
+    startRef.current     = null
+    stepStartRef.current = null
+    isPausedRef.current  = true
     setState('paused')
     onPauseRef.current?.()
   }
@@ -92,6 +116,7 @@ export default function BrewTimer({ onDone, onStepChange, onStart, onPause, onRe
     const now = Date.now()
     startRef.current     = now
     stepStartRef.current = now
+    isPausedRef.current  = false
     intervalRef.current  = setInterval(tick, 250)
     setState('running')
     onResumeRef.current?.()
@@ -103,15 +128,16 @@ export default function BrewTimer({ onDone, onStepChange, onStart, onPause, onRe
     setRealElapsed(0)
     setStepIdx(0)
     setStepElapsed(0)
-    stepIdxRef.current   = 0
-    realBaseRef.current  = 0
-    stepBaseRef.current  = 0
-    startRef.current     = null
+    stepIdxRef.current  = 0
+    realBaseRef.current = 0
+    stepBaseRef.current = 0
+    startRef.current    = null
     stepStartRef.current = null
+    isPausedRef.current = false
   }
 
   const skipStep = () => {
-    if (stepIdxRef.current >= STEPS.length - 1) return
+    if (stepIdxRef.current >= stepsRef.current.length - 1) return
     const now     = Date.now()
     const nextIdx = stepIdxRef.current + 1
     stepIdxRef.current   = nextIdx
@@ -121,6 +147,12 @@ export default function BrewTimer({ onDone, onStepChange, onStart, onPause, onRe
     setStepElapsed(0)
     onStepChangeRef.current?.(nextIdx)
   }
+
+  useEffect(() => {
+    if (onRequestTotalSecs) {
+      onRequestTotalSecs(() => getTotalSecs())
+    }
+  }, [])
 
   useEffect(() => () => clearInterval(intervalRef.current), [])
 
@@ -158,7 +190,7 @@ export default function BrewTimer({ onDone, onStepChange, onStart, onPause, onRe
       </div>
 
       <div className={styles.stepDots}>
-        {STEPS.map((s, i) => (
+        {steps.map((s, i) => (
           <div key={i} className={`${styles.dot} ${i < stepIdx ? styles.dotDone : ''} ${i === stepIdx && state !== 'idle' && state !== 'done' ? styles.dotActive : ''}`} />
         ))}
       </div>
@@ -189,8 +221,8 @@ export default function BrewTimer({ onDone, onStepChange, onStart, onPause, onRe
       </div>
 
       <div className={styles.timeline}>
-        {STEPS.map((s, i) => {
-          const start = STEPS.slice(0, i).reduce((a, x) => a + x.target, 0)
+        {steps.map((s, i) => {
+          const start = steps.slice(0, i).reduce((a, x) => a + x.target, 0)
           const done   = i < stepIdx || (i === stepIdx && state === 'done')
           const active = i === stepIdx && state !== 'idle' && state !== 'done'
           return (
@@ -209,7 +241,7 @@ export default function BrewTimer({ onDone, onStepChange, onStart, onPause, onRe
         {state === 'running' && (
           <>
             <button className={styles.btnSecondary} onClick={pause}>Pause</button>
-            {stepIdx < STEPS.length - 1 && (
+            {stepIdx < steps.length - 1 && (
               <button className={styles.btnGhost} onClick={skipStep}>Skip →</button>
             )}
             <button className={styles.btnGhost} onClick={reset}>Reset</button>
