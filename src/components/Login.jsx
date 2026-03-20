@@ -32,7 +32,7 @@ export default function Login({ onClose }) {
   return (
     <div className={styles.wrap}>
       <div className={styles.card}>
-        <Logo size={96} className={styles.logo} />
+        <Logo size={72} className={styles.logo} />
         <h1 className={styles.title}>
           <span className={styles.titleJust}>just </span>
           <span className={styles.titlePoured}>poured</span>
