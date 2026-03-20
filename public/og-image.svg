@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#faf8f5"/>
+
+  <!-- Subtle warm gradient overlay -->
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#fff8f0"/>
+      <stop offset="100%" stop-color="#f0e8dc"/>
+    </radialGradient>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&amp;display=swap');
+    </style>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- V60 Dripper logo — drawn at final size, centered -->
+  <g fill="none">
+    <!-- Body fill -->
+    <path d="M470 105 Q470 88 600 88 Q730 88 730 105 L648 300 Q634 322 600 322 Q566 322 552 300 Z" fill="#a07850" opacity="0.12"/>
+    <!-- Body outline -->
+    <path d="M470 105 Q470 88 600 88 Q730 88 730 105 L648 300 Q634 322 600 322 Q566 322 552 300 Z" stroke="#a07850" stroke-width="7" stroke-linejoin="round"/>
+    <!-- Rim ellipse -->
+    <ellipse cx="600" cy="105" rx="130" ry="19" stroke="#a07850" stroke-width="6"/>
+    <!-- Handle — D-shape on right -->
+    <path d="M688 160 C750 160 758 195 758 215 C758 235 750 262 688 262" stroke="#a07850" stroke-width="7" stroke-linecap="round"/>
+    <!-- Centre rib -->
+    <line x1="600" y1="106" x2="600" y2="318" stroke="#a07850" stroke-width="4" opacity="0.3" stroke-linecap="round"/>
+    <!-- Side ribs -->
+    <line x1="568" y1="110" x2="564" y2="310" stroke="#a07850" stroke-width="3" opacity="0.18" stroke-linecap="round"/>
+    <line x1="632" y1="110" x2="636" y2="310" stroke="#a07850" stroke-width="3" opacity="0.18" stroke-linecap="round"/>
+    <!-- Base plate -->
+    <ellipse cx="600" cy="334" rx="68" ry="14" stroke="#a07850" stroke-width="5" opacity="0.45"/>
+  </g>
+
+  <!-- "just poured" wordmark -->
+  <text x="600" y="440" text-anchor="middle" font-family="Manrope, system-ui, sans-serif" font-size="96" font-weight="700" letter-spacing="-1">
+    <tspan fill="#8a7060">just </tspan><tspan fill="#a07850">poured</tspan>
+  </text>
+
+  <!-- Subtitle -->
+  <text x="600" y="500" text-anchor="middle" font-family="Manrope, system-ui, sans-serif" font-size="28" font-weight="400" fill="#b8a898" letter-spacing="3">COFFEE JOURNAL</text>
+
+  <!-- URL -->
+  <text x="600" y="590" text-anchor="middle" font-family="Manrope, system-ui, sans-serif" font-size="22" font-weight="400" fill="#c8b8a8">justpoured.app</text>
+</svg>

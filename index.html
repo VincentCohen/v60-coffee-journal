@@ -3,16 +3,63 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- Primary meta -->
+    <title>JustPoured — Coffee Journal & Brew Tracker</title>
+    <meta name="description" content="Track your V60 brews, dial in your recipes, and log tasting notes. JustPoured is a personal coffee journal for pour-over enthusiasts." />
+    <meta name="keywords" content="coffee journal, V60, pour over, brew tracker, coffee log, tasting notes, coffee recipes, hario, specialty coffee" />
+    <meta name="author" content="JustPoured" />
+    <link rel="canonical" href="https://justpoured.app/" />
+
+    <!-- Open Graph (Facebook, WhatsApp, LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://justpoured.app/" />
+    <meta property="og:title" content="JustPoured — Coffee Journal & Brew Tracker" />
+    <meta property="og:description" content="Track your V60 brews, dial in your recipes, and log tasting notes. A personal coffee journal for pour-over enthusiasts." />
+    <meta property="og:image" content="https://justpoured.app/og-image.png" />
+    <meta property="og:site_name" content="JustPoured" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://justpoured.app/" />
+    <meta name="twitter:title" content="JustPoured — Coffee Journal & Brew Tracker" />
+    <meta name="twitter:description" content="Track your V60 brews, dial in your recipes, and log tasting notes. A personal coffee journal for pour-over enthusiasts." />
+    <meta name="twitter:image" content="https://justpoured.app/og-image.png" />
+
+    <!-- PWA / mobile -->
     <meta name="theme-color" content="#faf8f5" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#1a1208" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <title>JustPoured</title>
+    <meta name="apple-mobile-web-app-title" content="JustPoured" />
+    <meta name="application-name" content="JustPoured" />
+
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet" />
-    <!-- <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" /> -->
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "JustPoured",
+      "url": "https://justpoured.app",
+      "description": "A personal coffee journal and brew tracker for pour-over enthusiasts. Log brews, track beans, and dial in your V60 recipes.",
+      "applicationCategory": "LifestyleApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
