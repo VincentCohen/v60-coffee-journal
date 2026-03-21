@@ -71,12 +71,12 @@
   background: none;
   border: none;
   color: var(--text-3);
-  transition: color .15s;
+  transition: color .15s, transform .1s, opacity .1s;
   position: relative;
   text-decoration: none;
 }
 
-.navBtn:active { opacity: .7; }
+.navBtn:active { transform: scale(.92); opacity: .8; }
 
 .navBtnCenter {
   margin-top: -18px;
@@ -179,6 +179,15 @@
   font-weight: 600;
   min-width: 16px;
   text-align: center;
+}
+
+.pageTransition {
+  animation: pageFadeIn .16s ease both;
+}
+
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .themeBtn { display: none; }

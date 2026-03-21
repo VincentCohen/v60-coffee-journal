@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Routes, Route, NavLink, useNavigate, Navigate } from 'react-router-dom'
+import { Routes, Route, NavLink, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import { supabase } from './supabase.js'
 import { JH_RECIPE } from './defaultRecipe.js'
 import BrewTimer       from './components/BrewTimer.jsx'
@@ -32,6 +32,7 @@ export default function App() {
   })
 
   const navigate = useNavigate()
+  const location = useLocation()
   const {
     entries, beans, recipes, activeRecipeId,
     addEntry, deleteEntry, exportData, importData, getBeanMemory,
@@ -89,7 +90,7 @@ export default function App() {
   return (
     <div className={styles.app}>
       <main className={styles.main}>
-        <div className={styles.page}>
+        <div key={location.pathname} className={`${styles.page} ${styles.pageTransition}`}>
           <Routes>
             <Route path="/" element={<Navigate to="/brew" replace />} />
             <Route path="/brew" element={
