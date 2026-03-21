@@ -39,8 +39,9 @@ export default function BeanForm({ bean, onSave, onCancel }) {
   const handleSave = async () => {
     if (!form.name.trim()) { alert('Bean name is required.'); return }
     setSaving(true)
-    await onSave(form)
+    const result = await onSave(form)
     setSaving(false)
+    if (result?.error) alert('Failed to save: ' + result.error.message)
   }
 
   return (

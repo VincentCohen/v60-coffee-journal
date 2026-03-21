@@ -246,13 +246,13 @@ export default function Beans({ beans, entries, onAdd, onUpdate, onDelete, onBre
   }
 
   const handleFormSave = async (data) => {
-    if (editBean) {
-      await onUpdate(editBean.id, data)
-    } else {
-      await onAdd(data)
-    }
+    const result = editBean
+      ? await onUpdate(editBean.id, data)
+      : await onAdd(data)
+    if (result?.error) return result
     setShowForm(false)
     setEditBean(null)
+    return result
   }
 
   const filtered = beans

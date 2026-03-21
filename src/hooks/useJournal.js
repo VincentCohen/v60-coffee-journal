@@ -228,7 +228,7 @@ function fromSupabaseBean(row) {
     roastDate:     row.roast_date || null,
     purchaseDate:  row.purchase_date || null,
     weightG:       row.weight_g ?? null,
-    price:         row.price_idr ?? null,
+    price:         row.price ?? null,
     currency:      row.currency || 'USD',
     stockAdjustG:  row.stock_adjust_g ?? null,
     notes:         row.notes || '',
@@ -275,11 +275,10 @@ function toSupabaseBean(bean, userId) {
     roast_date:    bean.roastDate || null,
     purchase_date: bean.purchaseDate || null,
     weight_g:      bean.weightG ? Number(bean.weightG) : null,
-    price_idr:     bean.priceIdr ? Number(bean.priceIdr) : null,
-    notes:          bean.notes || null,
-    price_idr:      bean.price != null ? Number(bean.price) : null,
-    currency:       bean.currency || 'USD',
+    price:         bean.price != null ? Number(bean.price) : null,
+    currency:      bean.currency || 'USD',
     stock_adjust_g: bean.stockAdjustG != null ? Number(bean.stockAdjustG) : null,
+    notes:         bean.notes || null,
   }
   if (userId) row.user_id = userId
   return row
